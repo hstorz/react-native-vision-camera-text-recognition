@@ -1,6 +1,7 @@
 import React, { forwardRef, type ForwardedRef, useMemo } from 'react';
 import {
   Camera as VisionCamera,
+  runAtTargetFps,
   useFrameProcessor,
 } from 'react-native-vision-camera';
 import { createTextRecognitionPlugin } from './scanText';
@@ -41,15 +42,20 @@ export const Camera = forwardRef(function Camera(
     },
     [options]
   );
+
   const frameProcessor: ReadonlyFrameProcessor = useFrameProcessor(
     (frame: Frame) => {
       'worklet';
-      const data: Text[] | string = plugin(frame);
-      // @ts-ignore
-      useWorklets(data);
+      runAtTargetFps(1, () => {
+        'worklet'
+        const data: Text[] | string = plugin(frame);
+        // @ts-ignore
+        useWorklets(data);
+      })
     },
     []
   );
+
   return (
     <>
       {!!device && (
